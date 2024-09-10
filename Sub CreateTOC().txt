@@ -1,0 +1,53 @@
+Sub CreateTOC()
+    Dim ws As Worksheet
+    Dim TOC As Worksheet
+    Dim sheetName As String
+    Dim btn As Object
+    Dim row As Integer
+   
+    ' Delete existing TOC if it exists
+    On Error Resume Next
+    Set TOC = Worksheets("TOC")
+    Application.DisplayAlerts = False
+    If Not TOC Is Nothing Then
+        TOC.Delete
+    End If
+    Application.DisplayAlerts = True
+    On Error GoTo 0
+   
+    ' Add TOC worksheet
+    Set TOC = Worksheets.Add
+    TOC.Name = "TOC"
+   
+    ' Set up TOC formatting
+    TOC.Cells(1, 1).Value = "Table of Contents"
+    TOC.Cells(1, 1).Font.Bold = True
+    TOC.Cells(1, 1).Font.Size = 14
+    row = 3
+   
+    ' Loop through each worksheet and add to TOC
+    For Each ws In Worksheets
+        If ws.Name <> "TOC" Then
+            ' Add worksheet name to TOC
+            TOC.Cells(row, 1).Value = ws.Name
+            ' Create a hyperlink to the worksheet
+            TOC.Hyperlinks.Add Anchor:=TOC.Cells(row, 1), Address:="", SubAddress:="'" & ws.Name & "'!A1", TextToDisplay:=ws.Name
+            row = row + 1
+           
+            ' Add button to each worksheet to go back to TOC
+            Set btn = ws.Buttons.Add(10, 10, 100, 30)
+            With btn
+                .OnAction = "GoToTOC"
+                .Caption = "Go to TOC"
+                .Name = "btnToTOC"
+            End With
+        End If
+    Next ws
+   
+    ' Autofit TOC columns
+    TOC.Columns("A:A").AutoFit
+End Sub
+
+Sub GoToTOC()
+    Worksheets("TOC").Activate
+End Sub
